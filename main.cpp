@@ -11,13 +11,21 @@ bool desc (double i,double j) { return (i<j); }
 int main(){
 
 
-    std::string filename = "layers2.txt";
+    std::string filename = "layers3.txt";
 
     std::vector<std::vector<double> > layers;
-
+    ai::printMarker();
     ai::parseFileInMatrix(filename,' ',layers);
+    ai::printMarker();
+    ai::printMatrix(layers);
 
-    //ai::printMatrix(layers);
+
+    if(layers[1][0] > 0. ){
+        std::cout<<"WRONG LAYER SORT!!!!"<<std::endl;
+        for(;;){
+            break;
+        }
+    }
 
     std::size_t num;
     double H ;
@@ -27,17 +35,20 @@ int main(){
             if(layers[i][0]*layers[i][1] < 0.){
                 H = layers[i][1] - layers[i][0];
                 num = i;
+                break;
             }
 
     }
+    dx = 0.09*H;
     double sigma = layers[num][2];
     //std::cout<<"sigma = "<<sigma<<std::endl;
+    std::cout<<"Heigth of centeral layer = "<<H<<"    number = "<<num<<std::endl;
     std::vector<std::size_t> sloi;
 
     double h;
     double hnew;
     if(H < 11.2){
-
+        std::cout<<"H less than 11.2!!!!"<<std::endl;
         //H = 11.2;
 
         std::size_t it;
@@ -80,13 +91,57 @@ int main(){
 
         }
         H = 11.2;
-        dx = 1;
+        dx = 0.09 * H;
     }
 
+    if(H > 11.2){
+
+    std::size_t it;
+    it = num ;
+
+    sloi.push_back(it);
+
+    h = layers[it][1] - layers[it][0];
+    it--;
+
+    //while(  11.2/2. > std::abs(layers[it][1])){
+        //ai::printMarker();
+        //std::cout<<"std::abs(layers[it][0]))= "<<std::abs(layers[it][0])<<std::endl;
+
+        hnew = layers[it][1] - layers[it][0];
+
+        sigma = (sigma * h + hnew * layers[it][2])/(h+hnew);
+        h = h+hnew;
+        //std::cout<<"h = "<<h<<"    h new = "<<hnew<<"  sigma = "<<sigma<<std::endl;
+
+        sloi.push_back(it);
+        it--;
+    //}
+
+
+    it = num+1;
+
+    //while(11.2/2. > layers[it][0]){
+        //ai::printMarker();
+        //std::cout<<"std::abs(layers[it][0]))= "<<std::abs(layers[it][0])<<std::endl;
+
+        hnew = layers[it][1] - layers[it][0];
+
+        sigma = (sigma * h + hnew * layers[it][2])/(h+hnew);
+        h += hnew;
+        //std::cout<<"h = "<<h<<"    h new = "<<hnew<<"  sigma = "<<sigma<<std::endl;
+
+        sloi.push_back(it);
+        it++;
+
+    //}
+}
+
+    ai::printVector(sloi);
 
     std::size_t min = ai::min(sloi);
     std::size_t max = ai::max(sloi);
-
+    ai::printMarker();
     std::vector<std::vector<double> > layers1;
 
     for(size_t i = 1; i < layers.size(); i++ ){
@@ -140,7 +195,7 @@ int main(){
         up-=dx;
     }
 
-
+std::cout<<"STEP = "<<dx<<std::endl;
     // std::cout<<"mesh:"<<std::endl;
     // ai::printMatrix(mesh);
 
@@ -196,212 +251,201 @@ int main(){
     size_t j = middle -1;
 
 
-    for(size_t i = num-1; i > 0; --i){  //Идем по слоям layers1 i - итератор
+    for(size_t i = num-1; i >= 0; --i){  //Идем по слоям layers1 i - итератор
         //std::cout<<" "<<std::endl;
-        //std::cout<<"iteration = "<<i<<std::endl;
+        // std::cout<<"iteration = "<<i<<std::endl;
         h = layers1[i][1]-layers1[i][0];     //j - итератор по mesh1
-        //std::cout<<"h curent layer = "<<h<<std::endl;
-        dl = std::ceil(h / dx);
-        //std::cout<<"number of dx in layer = "<<dl<<std::endl;
-        if(dl < eps){
+        // std::cout<<"h curent layer = "<<h<<std::endl;
+        dl = std::floor(h / dx + 0.5);
+        if((int)dl == 1 ){
+            // std::cout<<"number of dx in layer = "<<dl<<std::endl;
+            // std::cout<<"j = "<<j<<std::endl;
+            // std::cout<<"i = "<<i<<std::endl;
+            // ai::printMarker();
             mesh1[j][2]+=h*layers1[i][2];
-            //std::cout<<"mesh1 = "<<mesh1[j][2]<<std::endl;
-            i--;
-            mesh1[j][2]+=(dx-h)*layers1[i][2];
-            //std::cout<<"mesh1 = "<<mesh1[j][2]<<std::endl;
+            mesh1[j][3]+=h*layers1[i][3];
+            mesh1[j][4]+=h*layers1[i][4];
+            mesh1[j][5]+=h*layers1[i][5];
+            // std::cout<<"mesh1 = "<<mesh1[j][2]<<std::endl;
+            if(i>=0){
+                //ai::printMarker();
+                i--;
+                mesh1[j][2]+=(dx-h)*layers1[i][2];
+                mesh1[j][3]+=(dx-h)*layers1[i][3];
+                mesh1[j][4]+=(dx-h)*layers1[i][4];
+                mesh1[j][5]+=(dx-h)*layers1[i][5];
+            }
+            // std::cout<<"mesh1 = "<<mesh1[j][2]<<std::endl;
             i++;
             j--;
         }
 
-        if(dl > eps){
+        if((int)dl > 1){
             int iter = 0;
-            //std::cout<<"j = "<<j<<std::endl;
-            //std::cout<<"i = "<<i<<std::endl;
+            // std::cout<<"j = "<<j<<std::endl;
+            // std::cout<<"i = "<<i<<std::endl;
+            double dh;
 
-            h = 0;
             while(iter < (int)dl){
-                mesh1[j][2] = layers1[i][2];
-                j--;
+                if(j>=0){
+                    // ai::printMarker();
+                    // dh =
+                    mesh1[j][2] = layers1[i][2];
+                    mesh1[j][3] = layers1[i][3];
+                    mesh1[j][4] = layers1[i][4];
+                    mesh1[j][5] = layers1[i][5];
+                    if (j==0){break;}
+
+                    j--;
+
+                }
                 iter++;
                 //std::cout<<"j = "<<j<<"   iter = "<<iter<<std::endl;
+                //if((int)dl == 1) j--;
             }
-            //j++;
+            // j++;
             //i++;
         }
+        if (i==0){break;}
+        if (j==0){break;}
     }
-
-     j = middle +1;
+// std::cout<<"Up is fineshed"<<std::endl;
+// std::cout<<" "<<std::endl;
+// std::cout<<" "<<std::endl;
+// std::cout<<" "<<std::endl;
+     j = middle + 1;
 
 
     for(size_t i = num+1; i < layers1.size(); ++i){  //Идем по слоям layers1 i - итератор
-        std::cout<<" "<<std::endl;
-        std::cout<<"iteration = "<<i<<std::endl;
+        // std::cout<<" "<<std::endl;
+        // std::cout<<"iteration = "<<i<<std::endl;
         h = layers1[i][1]-layers1[i][0];     //j - итератор по mesh1
-        std::cout<<"h curent layer = "<<h<<std::endl;
-        dl = std::ceil(h / dx);
-        std::cout<<"number of dx in layer = "<<dl<<std::endl;
-        if(dl < eps){
+        // std::cout<<"h curent layer = "<<h<<std::endl;
+        dl = std::floor(h / dx + 0.5);
+        // std::cout<<"number of dx in layer = "<<dl<<std::endl;
+        if( (int)dl == 1){
+            // std::cout<<"i = " <<i<<"    j = "<<j<<std::endl;
+
             mesh1[j][2]+=h*layers1[i][2];
-            //std::cout<<"mesh1 = "<<mesh1[j][2]<<std::endl;
-            i++;
-            mesh1[j][2]+=(dx-h)*layers1[i][2];
-            //std::cout<<"mesh1 = "<<mesh1[j][2]<<std::endl;
+            mesh1[j][3]+=h*layers1[i][3];
+            mesh1[j][4]+=h*layers1[i][4];
+            mesh1[j][5]+=h*layers1[i][5];
+            // std::cout<<"h= "<< h<<"*"<<"layers1[i][2]"<<layers1[i][2]<<" = "<<mesh1[j][2]<<std::endl;
+            //std::cout<<"layers1[i][2] = "<<layers1[i][2]<<std::endl;
+
+            if( i < layers1.size() ){
+                i++;
+                mesh1[j][2]+=(dx-h)*layers1[i][2];
+                mesh1[j][3]+=(dx-h)*layers1[i][3];
+                mesh1[j][4]+=(dx-h)*layers1[i][4];
+                mesh1[j][5]+=(dx-h)*layers1[i][5];
+
+                // std::cout<<"dx - h= "<< dx-h<<"*"<<"layers1[i][2] = "<<layers1[i][2]<<" = "<<(dx-h)*layers1[i][2]<<std::endl;
+            }
+            // std::cout<<"mesh1 = "<<mesh1[j][2]<<std::endl;
             i--;
             j++;
         }
 
-        if(dl > eps){
+        if((int)dl > 1){
             int iter = 0;
-            std::cout<<"j = "<<j<<std::endl;
-            std::cout<<"i = "<<i<<std::endl;
+            // std::cout<<"j = "<<j<<std::endl;
+            // std::cout<<"i = "<<i<<std::endl;
+            // std::cout<<"number of layers = "<<(int)dl<<std::endl;
 
             h = 0;
             while(iter < (int)dl){
-                if(j<mesh1.size())
+                if( j < mesh1.size() ) {
                 mesh1[j][2] = layers1[i][2];
+                mesh1[j][3] = layers1[i][3];
+                mesh1[j][4] = layers1[i][4];
+                mesh1[j][5] = layers1[i][5];
+
+                    if (j==mesh1.size() - 1){break;}
+
                 j++;
+                }
                 iter++;
-                std::cout<<"j = "<<j<<"   iter = "<<iter<<std::endl;
+                //std::cout<<"j = "<<j<<"   iter = "<<iter<<std::endl;
             }
+            if (i==layers1.size()-1){break;}
+            if (j==mesh1.size()-1){break;}
             //j++;
             //i++;
         }
     }
-    // double dist;
-    // size_t j = num-1;
-    // size_t it;
-    //
-    // for(size_t i = middle-1 ; i > 0 ; i--){ //идеем по mesh i
-    //     rastlayer = 0;
-    //     rastmesh = mesh1[i][1] - mesh1[i][0];
-    //     std::cout<<"                                   "<<std::endl;
-    //     std::cout<<" "<<std::endl;
-    //     dist = 0;
-    //     // for(size_t j = num-1 ; j > 0; j-- ){ //идем по layers1 j
-    //     while(j > 0){      //идем по layers1 j- индекс
-    //             //j--;
-    //
-    //             it=0;
-    //             bool q = 1;
-    //
-    //             rastlayer += layers1[j][1] - layers1[j][0];
-    //             dist = (dx - rastlayer) > 0 ? dx-rastlayer :dist;
-    //             std::cout<<"j = "<<j<<std::endl;
-    //             std::cout<<"dist = "<<dist<<std::endl;
-    //             if(rastlayer < rastmesh){
-    //                 std::cout<<"rastlayer < rastmesh"<<std::endl;
-    //                 std::cout<<"rastlayer = "<<rastlayer<<"   rastmesh = "<<rastmesh<<std::endl;
-    //                 mesh1[i][2] += layers1[j][2]*(layers1[j][1] - layers1[j][0]);
-    //                 std::cout<<"mesh1["<<i<<"][2] = "<<mesh1[i][2]<<std::endl;
-    //
-    //             }
-    //             if(rastlayer >= rastmesh){
-    //                 std::cout<<"rastlayer >= rastmesh"<<std::endl;
-    //                 std::cout<<"rastlayer = "<<rastlayer<<std::endl;
-    //                 std::cout<<"layers1[j][1]-layers1[j][0] = "<<layers1[j][1]-layers1[j][0]<<std::endl;
-    //                 dist = dist < eps ? dx : dist;
-    //                 mesh1[i][2] += layers1[j][2]*(dist);
-    //                 it=1;
-    //                 mesh1[i][2]/=dx;
-    //                 q = 0;
-    //
-    //                 std::cout<<"j = "<<j<<std::endl;
-    //                 j--;
-    //
-    //                 std::cout<<"  # j  = "<<j<<std::endl;
-    //                 std::cout<<"mesh1["<<i<<"][2] = "<<mesh1[i][2]<<std::endl;
-    //                 break;
-    //             }
-    //             // if(!q){
-    //             //     j--;
-    //             //     break;
-    //             //
-    //             // }
-    //             j--;
-    //     }
-    // }
-    // for(size_t i = num-1 ; i > num -4 ; i--){ //идеем по layers1 i
-    //     double rastlayer = layers1[i][1] - layers1[i][0];
-    //     double rastmesh ;
-    //     for(size_t j = middle-1 ; j > 0; j-- ){ //идем по mesh1 j
-    //
-    //             rastmesh += mesh1[j][1] - mesh1[j][0];
-    //             if( rastlayer <= rastmesh ){
-    //
-    //                 mesh1[j][2] = layers1[i][2];
-    //                 j--;
-    //                 break;
-    //             }
-    //
-    //
-    //     }
-    // }
 
+    std::vector<std::vector<double> > mesh2;
+    double start , end;
+    // ai::printMarker();
+     for(size_t i =0 ; i<mesh1.size()-1; ++i){
+
+
+         // ai::printMarker();
+         sigma = mesh1[i][2];
+         end = mesh1[i][1];
+         start = mesh1[i][0];
+        while(mesh1[i][2] == mesh1[i+1][2]){
+            //std::cout<<" i = "<<i<<std::endl;
+            //std::cout<<"Sigma ="<<sigma<<std::endl;
+            sigma = mesh1[i+1][2];
+            end = mesh1[i+1][1];
+                i++;
+
+                if( i == mesh1.size()-1 ){ break;}
+
+        }
+        mesh2.push_back(std::vector<double>{start,  end, sigma, mesh1[i][3], mesh1[i][4], mesh1[i][5]} );
+
+
+     }
+
+     for(size_t i = 0 ; i < mesh2.size();++i){
+         if(mesh2[i][1]*mesh2[i][0]<0.){
+             middle = i;
+             break;
+         }
+     }
+
+     for(size_t i = middle ; i>1 ;--i){
+        if(mesh2[i-1][2]-mesh2[i][2]>6.){
+            mesh2[i-1][2]= 6. + mesh[i][2];
+            std::cout<<">6"<<std::endl;
+        }
+     }
+
+     for(size_t i = middle ; i<mesh2.size()-1 ;++i){
+        if(mesh2[i+1][2]-mesh2[i][2]>6.){
+            mesh2[i+1][2]= 6. + mesh[i][2];
+            std::cout<<">6"<<std::endl;
+        }
+     }
+     std::cout<<"mesh2:"<<std::endl;
+     std::cout<<"middle = "<<middle<<std::endl;
+     // layers.resize(mesh2.size());
+     // for(size_)
+
+     ai::printMatrix(mesh2);
+     ai::saveMatrix("mesh2",mesh2);
+
+     layers.clear();
+     std::vector<std::vector<double> > layerss;
+     // for(size_t i =0 ; i < mesh2.size(); ++i){
+     //     layers[i].resize(mesh2.size());
+     // }
+     ai::printMarker();
+     for(size_t i =mesh2.size()-1 ; i>0 ; --i){
+         layerss.push_back(std::vector<double>{mesh2[i][0], mesh2[i][1], mesh2[i][2],mesh2[i][3],mesh2[i][4],mesh2[i][5]} );
+     }
+     ai::saveMatrix("layerss", layerss);
     std::cout<<"mesh1:"<<std::endl;
     ai::printMatrix(mesh1);
-    //num- номер стоки с продуктивным слоем
-    //Запоминаем максимальную и минимальную высоту относительно нуля
 
-   //
-   //  double up = layers1[0][0];
-   //  double down = layers1[layers1.size()-1][1];
-   //
-   //
-   //  std::cout<<"UP = "<<up<<"    DOWN = "<<down<<std::endl;
-   //
-   //
-   //  //делаем сетку
-   //  std::vector<double> mesh;
-   //  double coord = dx/2. ;
-   //
-   //  mesh.push_back(coord);
-   //
-   //  while(coord <  down){
-   //
-   //      coord += dx;
-   //
-   //      mesh.push_back(coord);
-   //
-   //  }
-   //
-   //  coord = -dx/2.;
-   //
-   //  mesh.push_back(coord);
-   //  while(std::abs(coord)< std::abs(up)){
-   //      coord -= dx;
-   //
-   //      mesh.push_back(coord);
-   //
-   //  }
-   //  //Сортируем сетку
-   //  std::sort(mesh.begin() ,mesh.end(), desc);
-   //  //Ячейки
-   //  std::vector<std::vector<double> >cells;
-   //
-   //  std::cout<<"Mesh:"<<std::endl;
-   //  //ai::printVector(mesh);
-   //  for(size_t i = 0 ; i < mesh.size() - 1 ;i++){
-   //      //ai::printMarker();
-   //      cells.push_back(std::vector<double>{mesh[i], mesh[i+1]} );
-   //  }
-   //  //mesh.clear();
-   //  //ai::printMarker();
-   //  std::cout<<"Cells"<<std::endl;
-   //  ai::printMatrix(cells);
-   // // матрица хранящая ячейки
-   //  std::vector<std::vector<size_t> > sl;//для хранения слоев
-   //
-   //  for(size_t i = 0; i < layers1.size(); i++){
-   //      for(size_t j = 0; j < cells.size(); ++j){
-   //          if(layers1[i][0]<=cells[j][0] && layers1[i][1]>=cells[j][1])
-   //          sl.push_back(std::vector<size_t>{i,j});
-   //      }
-   //  }
-    // ai::printVector(sloi);
+    //ai::saveMatrix("mesh",mesh1);
+
     std::cout<<"New layers"<<std::endl;
     ai::printMatrix(layers1);
 
-    // std::cout<<"sl"<<std::endl;
-    // ai::printMatrix(sl);
+
     return 1 ;
 }
