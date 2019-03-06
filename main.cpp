@@ -11,22 +11,39 @@ bool desc (double i,double j) { return (i<j); }
 int main(){
 
 
-    std::string filename = "layers3.txt";
+    std::string filename = "layers1.txt";
 
     std::vector<std::vector<double> > layers;
+    std::vector<std::vector<double> > la;
     ai::printMarker();
-    ai::parseFileInMatrix(filename,' ',layers);
+    std::cout<<"la:"<<std::endl;
+    ai::parseFileInMatrix(filename,' ',la);
+    ai::printMatrix(la);
     ai::printMarker();
-    ai::printMatrix(layers);
+    bool srt = 1;
 
 
-    if(layers[1][0] > 0. ){
+    if(la[1][0] < 0. ){
         std::cout<<"WRONG LAYER SORT!!!!"<<std::endl;
-        for(;;){
-            break;
+        srt = 0;
+    }
+ai::printMarker();
+    if(srt == 1){
+        for(size_t i = la.size() ; i > 1 ; ){
+            --i;
+            layers.push_back(std::vector<double>{la[i][0], la[i][1], la[i][2],la[i][3],la[i][4],la[i][5]} );
+            //std::cout<<"iter = "<<i<<std::endl;
         }
     }
-
+    if(srt == 0){
+        for(size_t i = 1; i < la.size() ;++i ){
+            layers.push_back(std::vector<double>{la[i][0], la[i][1], la[i][2],la[i][3],la[i][4],la[i][5]} );
+            std::cout<<"iter = "<<i<<std::endl;
+        }
+    }
+    ai::printMarker();
+    std::cout<<"layers:"<<std::endl;
+    ai::printMatrix(layers);
     std::size_t num;
     double H ;
     double dx;
@@ -39,7 +56,7 @@ int main(){
             }
 
     }
-    dx = 0.09*H;
+    dx = 0.09 * H;
     double sigma = layers[num][2];
     //std::cout<<"sigma = "<<sigma<<std::endl;
     std::cout<<"Heigth of centeral layer = "<<H<<"    number = "<<num<<std::endl;
@@ -127,9 +144,9 @@ int main(){
 
         hnew = layers[it][1] - layers[it][0];
 
-        sigma = (sigma * h + hnew * layers[it][2])/(h+hnew);
+        sigma = layers[num][2];
         h += hnew;
-        //std::cout<<"h = "<<h<<"    h new = "<<hnew<<"  sigma = "<<sigma<<std::endl;
+        std::cout<<"h = "<<h<<"    h new = "<<hnew<<"  sigma = "<<sigma<<std::endl;
 
         sloi.push_back(it);
         it++;
@@ -144,7 +161,7 @@ int main(){
     ai::printMarker();
     std::vector<std::vector<double> > layers1;
 
-    for(size_t i = 1; i < layers.size(); i++ ){
+    for(size_t i = 0; i < layers.size(); i++ ){
         layers1.push_back(std::vector<double>{layers[i][0] ,layers[i][1], layers[i][2], layers[i][3], layers[i][4], layers[i][5]} );
         if(i == min){
             layers1.push_back(std::vector<double>{-H/2. ,H/2., sigma, layers[i][3], layers[i][4], layers[i][5]});
@@ -252,21 +269,21 @@ std::cout<<"STEP = "<<dx<<std::endl;
 
 
     for(size_t i = num-1; i >= 0; --i){  //Идем по слоям layers1 i - итератор
-        //std::cout<<" "<<std::endl;
-        // std::cout<<"iteration = "<<i<<std::endl;
+        std::cout<<" "<<std::endl;
+        std::cout<<"iteration = "<<i<<std::endl;
         h = layers1[i][1]-layers1[i][0];     //j - итератор по mesh1
-        // std::cout<<"h curent layer = "<<h<<std::endl;
+        std::cout<<"h curent layer = "<<h<<std::endl;
         dl = std::floor(h / dx + 0.5);
         if((int)dl == 1 ){
-            // std::cout<<"number of dx in layer = "<<dl<<std::endl;
-            // std::cout<<"j = "<<j<<std::endl;
-            // std::cout<<"i = "<<i<<std::endl;
-            // ai::printMarker();
+            std::cout<<"number of dx in layer = "<<dl<<std::endl;
+            std::cout<<"j = "<<j<<std::endl;
+            std::cout<<"i = "<<i<<std::endl;
+            ai::printMarker();
             mesh1[j][2]+=h*layers1[i][2];
             mesh1[j][3]+=h*layers1[i][3];
             mesh1[j][4]+=h*layers1[i][4];
             mesh1[j][5]+=h*layers1[i][5];
-            // std::cout<<"mesh1 = "<<mesh1[j][2]<<std::endl;
+            std::cout<<"mesh1 = "<<mesh1[j][2]<<std::endl;
             if(i>=0){
                 //ai::printMarker();
                 i--;
@@ -274,21 +291,26 @@ std::cout<<"STEP = "<<dx<<std::endl;
                 mesh1[j][3]+=(dx-h)*layers1[i][3];
                 mesh1[j][4]+=(dx-h)*layers1[i][4];
                 mesh1[j][5]+=(dx-h)*layers1[i][5];
+
+                mesh1[j][2]/=dx;
+                mesh1[j][3]/=dx;
+                mesh1[j][4]/=dx;
+                mesh1[j][5]/=dx;
             }
-            // std::cout<<"mesh1 = "<<mesh1[j][2]<<std::endl;
+            std::cout<<"mesh1 = "<<mesh1[j][2]<<std::endl;
             i++;
             j--;
         }
 
         if((int)dl > 1){
             int iter = 0;
-            // std::cout<<"j = "<<j<<std::endl;
-            // std::cout<<"i = "<<i<<std::endl;
+            std::cout<<"j = "<<j<<std::endl;
+            std::cout<<"i = "<<i<<std::endl;
             double dh;
 
-            while(iter < (int)dl){
+            while(iter <= (int)dl){
                 if(j>=0){
-                    // ai::printMarker();
+                    ai::printMarker();
                     // dh =
                     mesh1[j][2] = layers1[i][2];
                     mesh1[j][3] = layers1[i][3];
@@ -300,7 +322,7 @@ std::cout<<"STEP = "<<dx<<std::endl;
 
                 }
                 iter++;
-                //std::cout<<"j = "<<j<<"   iter = "<<iter<<std::endl;
+                std::cout<<"j = "<<j<<"   iter = "<<iter<<std::endl;
                 //if((int)dl == 1) j--;
             }
             // j++;
@@ -354,7 +376,7 @@ std::cout<<"STEP = "<<dx<<std::endl;
             // std::cout<<"number of layers = "<<(int)dl<<std::endl;
 
             h = 0;
-            while(iter < (int)dl){
+            while(iter <= (int)dl){
                 if( j < mesh1.size() ) {
                 mesh1[j][2] = layers1[i][2];
                 mesh1[j][3] = layers1[i][3];
@@ -434,8 +456,10 @@ std::cout<<"STEP = "<<dx<<std::endl;
      //     layers[i].resize(mesh2.size());
      // }
      ai::printMarker();
-     for(size_t i =mesh2.size()-1 ; i>0 ; --i){
+     for(size_t i = mesh2.size() ; i > 0 ; ){
+         --i;
          layerss.push_back(std::vector<double>{mesh2[i][0], mesh2[i][1], mesh2[i][2],mesh2[i][3],mesh2[i][4],mesh2[i][5]} );
+         std::cout<<"iter = "<<i<<std::endl;
      }
      ai::saveMatrix("layerss", layerss);
     std::cout<<"mesh1:"<<std::endl;
