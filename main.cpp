@@ -11,7 +11,7 @@ bool desc (double i,double j) { return (i<j); }
 int main(){
 
 
-    std::string filename = "layers1.txt";
+    std::string filename = "layers4.txt";
 
     std::vector<std::vector<double> > layers;
     std::vector<std::vector<double> > la;
@@ -76,7 +76,7 @@ ai::printMarker();
         h = layers[it][1] - layers[it][0];
         it--;
 
-        while(  11.2/2. > std::abs(layers[it][1])){
+        while( 11.2/2. > std::abs(layers[it][1])){
             //ai::printMarker();
             //std::cout<<"std::abs(layers[it][0]))= "<<std::abs(layers[it][0])<<std::endl;
 
@@ -171,15 +171,7 @@ ai::printMarker();
     }
     // Обрабатываем пересечение слоев
 
-    // for(std::size_t i = 0 ; i < layers1.size()-1;++i){
-    //         if( abs(layers1[i][1])>abs(layers1[i+1][0]) ){
-    //
-    //             layers1[i+1][0] = layers1[i][1];
-    //         }
-    //         else{
-    //             layers1[i][1] = layers1[i+1][0];
-    //         }
-    // }
+
     for(size_t i = 0 ; i < layers1.size();i++){
         if (layers1[i][0]*layers1[i][1] < 0.) num = i;
     }
@@ -273,7 +265,7 @@ std::cout<<"STEP = "<<dx<<std::endl;
         std::cout<<"iteration = "<<i<<std::endl;
         h = layers1[i][1]-layers1[i][0];     //j - итератор по mesh1
         std::cout<<"h curent layer = "<<h<<std::endl;
-        dl = std::floor(h / dx + 0.5);
+        dl = std::ceil(h / dx );
         if((int)dl == 1 ){
             std::cout<<"number of dx in layer = "<<dl<<std::endl;
             std::cout<<"j = "<<j<<std::endl;
@@ -308,7 +300,7 @@ std::cout<<"STEP = "<<dx<<std::endl;
             std::cout<<"i = "<<i<<std::endl;
             double dh;
 
-            while(iter <= (int)dl){
+            while(iter < (int)dl){
                 if(j>=0){
                     ai::printMarker();
                     // dh =
