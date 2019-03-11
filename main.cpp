@@ -356,10 +356,8 @@ void ApproximateLayers(std::vector<std::vector<double> >&layers){
         std::vector<std::vector<double> > mesh2;
         double start , end;
         // ai::printMarker();
-         for(size_t i =0 ; i<mesh1.size()-1; ++i){
-
-
-             // ai::printMarker();
+         for(size_t i = 0 ; i < mesh1.size()-1; ++i){
+            // ai::printMarker();
              sigma = mesh1[i][2];
              end = mesh1[i][1];
              start = mesh1[i][0];
